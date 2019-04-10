@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">iMAPS</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_map">Map</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="test">Test</string>
+    <string name="no_reviews">0 reviews</string>
+    <string name="your_position">Your position</string>
+    <string name="no_address">No address</string>
+
+    <string name="could_not_start">Permission denied, unable to resume the application</string>
+    <string name="could_not_start_gps_disabled">GPS is disabled, please enable it in order to run the app</string>
+    <string name="search">Search</string>
+    <string name="error_message">Error Message</string>
+    <string name="no_places_available">No places available</string>
+    <string name="could_not_get_position">Could not get your position</string>
+    <string name="couldnt_retrive_data">Could not retrieve data</string>
+    <string name="preparing_gps">Preparing GPS …</string>
+    <string name="almost_there">Almost there …</string>
+</resources>
