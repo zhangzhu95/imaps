@@ -3,6 +3,7 @@ package io.waazaki.ibmassignment.ui.home.map;
 import android.annotation.SuppressLint;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -39,6 +40,8 @@ import io.waazaki.ibmassignment.ui.base.BaseFragment;
 import io.waazaki.ibmassignment.utils.CustomMarker;
 import io.waazaki.ibmassignment.utils.Utils;
 
+import static io.waazaki.ibmassignment.utils.AppConstants.TIME_BETWEEN_LOCATION_RETRIES;
+
 public class MapsFragment extends BaseFragment implements MapsContract.IMapsView, OnMapReadyCallback{
 
     private View view;
@@ -71,6 +74,7 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
 
         return view;
     }
+
 
     /**
      * Manipulates the map once available.
@@ -157,6 +161,31 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
         });
     }
 
+    /*
+    If not able to retieve the current position, retry after a certain duration
+     */
+    @Override
+    public void retryRetrieveCurrentPosition(){
+        LogInfo("Retry retrieving current position Again");
+        presenter.incrementLocationRetries();
+        new CountDownTimer(TIME_BETWEEN_LOCATION_RETRIES , TIME_BETWEEN_LOCATION_RETRIES){
+            @Override
+            public void onTick(long l) {
+                //Interval
+            }
+
+            @Override
+            public void onFinish() {
+                if(presenter.hasExceededLocationRetries()){
+                    LogError("Exceeded the number of retries");
+                    showPositionMessage();
+                }else{
+                    retrieveCurrentPosition();
+                }
+            }
+        }.start();
+    }
+
     /**
      * Getting the current position
      */
@@ -168,19 +197,24 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
                     @Override
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            //Set the location as a current destination
-                            presenter.setCurrentDestination(location.getLatitude() , location.getLongitude());
 
-                            //Navigate to the current destination
-                            navigateDefaultDestination();
-
-                            //Load businesses of the current destination
-                            presenter.loadBusinesses(presenter.getCurrentCoordinate().getLatitude() , presenter.getCurrentCoordinate().getLongitude());
+                        if (location == null) {
+                            LogInfo("Location is null");
+                            retryRetrieveCurrentPosition();
+                            return;
                         }else{
-                            //Could not found the last known location
-                            showPositionMessage();
+                            LogInfo("Location is available, reset location retries");
+                            presenter.resetLocationRetries();
                         }
+
+                        //Set the location as a current destination
+                        presenter.setCurrentDestination(location.getLatitude() , location.getLongitude());
+
+                        //Navigate to the current destination
+                        navigateDefaultDestination();
+
+                        //Load businesses of the current destination
+                        presenter.loadBusinesses(presenter.getCurrentCoordinate().getLatitude() , presenter.getCurrentCoordinate().getLongitude());
                     }
                 });
     }

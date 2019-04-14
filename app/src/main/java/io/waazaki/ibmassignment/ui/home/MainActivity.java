@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -19,7 +18,6 @@ import io.waazaki.ibmassignment.utils.AppConstants;
 import io.waazaki.ibmassignment.utils.GpsUtils;
 
 import static io.waazaki.ibmassignment.utils.AppConstants.LOCATION_REQUEST_CODE;
-import static io.waazaki.ibmassignment.utils.AppConstants.TIME_TO_WAIT_GPS_MILLIS;
 
 public class MainActivity extends BaseActivity implements MainContract.IMainView {
 
@@ -82,20 +80,7 @@ public class MainActivity extends BaseActivity implements MainContract.IMainView
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK && requestCode == AppConstants.GPS_REQUEST) {
-            //
-            Toast.makeText(this, R.string.preparing_gps, Toast.LENGTH_LONG).show();
-            Toast.makeText(this, R.string.almost_there, Toast.LENGTH_SHORT).show();
-            new CountDownTimer(TIME_TO_WAIT_GPS_MILLIS, TIME_TO_WAIT_GPS_MILLIS){
-                @Override
-                public void onTick(long l) {
-                    //On Tick
-                }
-                @Override
-                public void onFinish() {
-                    //Show the default fragment
-                    showDefaultFragment();
-                }
-            }.start();
+            showDefaultFragment();
         }else{
             killProcessGPSNotEnabled();
         }

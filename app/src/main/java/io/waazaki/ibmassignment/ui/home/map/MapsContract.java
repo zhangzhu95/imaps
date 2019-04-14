@@ -9,6 +9,7 @@ class MapsContract {
     interface IMapsView{
         void bindViews();
         void setupViews();
+        void retryRetrieveCurrentPosition();
         void retrieveCurrentPosition();
         void defaultViewsState();
         void showProgressBar();
@@ -25,5 +26,9 @@ class MapsContract {
     interface IMapsPresenter{
         void loadBusinesses(double lat , double lon);
         void setCurrentDestination(double lat , double lon);
+
+        boolean hasExceededLocationRetries();
+        void resetLocationRetries();
+        void incrementLocationRetries();
     }
 }
