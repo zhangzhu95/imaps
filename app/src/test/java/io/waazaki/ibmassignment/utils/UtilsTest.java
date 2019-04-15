@@ -22,7 +22,7 @@ public class UtilsTest {
     @Test
     public void getRetrofit() {
         Retrofit retrofit = Utils.getRetrofit();
-        assertEquals("http://api.yelp.com/v3/" , retrofit.baseUrl().toString());
+        assertEquals("https://api.yelp.com/v3/" , retrofit.baseUrl().toString());
     }
 
     @Test
