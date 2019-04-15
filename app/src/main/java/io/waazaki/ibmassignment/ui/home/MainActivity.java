@@ -21,28 +21,7 @@ import static io.waazaki.ibmassignment.utils.AppConstants.LOCATION_REQUEST_CODE;
 
 public class MainActivity extends BaseActivity implements MainContract.IMainView {
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_map:
-                    Toast.makeText(MainActivity.this, R.string.title_map, Toast.LENGTH_SHORT).show();
-                    return true;
-                case R.id.navigation_dashboard:
-                    Toast.makeText(MainActivity.this, R.string.title_dashboard, Toast.LENGTH_SHORT).show();
-                    return true;
-                case R.id.navigation_notifications:
-                    Toast.makeText(MainActivity.this, R.string.title_notifications, Toast.LENGTH_SHORT).show();
-                    return true;
-            default:
-                //Nothing to do
-                break;
-            }
-            return false;
-        }
-    };
+    private BottomNavigationView mBottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,13 +71,32 @@ public class MainActivity extends BaseActivity implements MainContract.IMainView
     @Override
     public void bindViews() {
         //Setup the bottom navigation
-        BottomNavigationView mBottomNavigationView = findViewById(R.id.navigation);
-        mBottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        mBottomNavigationView = findViewById(R.id.navigation);
     }
 
     @Override
     public void setupViews() {
         //Setup views
+        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.navigation_map:
+                        Toast.makeText(MainActivity.this, R.string.title_map, Toast.LENGTH_SHORT).show();
+                        return true;
+                    case R.id.navigation_dashboard:
+                        Toast.makeText(MainActivity.this, R.string.title_dashboard, Toast.LENGTH_SHORT).show();
+                        return true;
+                    case R.id.navigation_notifications:
+                        Toast.makeText(MainActivity.this, R.string.title_notifications, Toast.LENGTH_SHORT).show();
+                        return true;
+                    default:
+                        //Nothing to do
+                        break;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -126,11 +124,11 @@ public class MainActivity extends BaseActivity implements MainContract.IMainView
         new GpsUtils(this).turnGPSOn(new GpsUtils.onGpsListener() {
             @Override
             public void gpsStatus(boolean isGPSEnable) {
-            if(!isGPSEnable) {
-                killProcessGPSNotEnabled();
-            }else{
-                showDefaultFragment();
-            }
+                if(isGPSEnable) {
+                    showDefaultFragment();
+                }else{
+                    killProcessGPSNotEnabled();
+                }
             }
         });
     }

@@ -45,10 +45,10 @@ import static io.waazaki.ibmassignment.utils.AppConstants.TIME_BETWEEN_LOCATION_
 public class MapsFragment extends BaseFragment implements MapsContract.IMapsView, OnMapReadyCallback{
 
     private View view;
-    private SupportMapFragment mapFragment;
+    private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
     private ProgressBar mProgressBar;
-    private RecyclerView recyclerViewVertical;
+    private RecyclerView mRecyclerViewVertical;
     private VerticalAdapter verticalAdapter;
     private BottomSheetBehavior mBehavior;
     private NestedScrollView nestedScrollView;
@@ -96,10 +96,10 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
     @Override
     public void bindViews() {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
         mProgressBar = view.findViewById(R.id.progress_bar);
-        recyclerViewVertical = view.findViewById(R.id.recycler_view_vertical);
+        mRecyclerViewVertical = view.findViewById(R.id.recycler_view_vertical);
         mLinearLayoutError = view.findViewById(R.id.linear_layout_error);
         mImageViewIcon = view.findViewById(R.id.image_view_icon);
         mTextViewError = view.findViewById(R.id.text_view_error);
@@ -107,20 +107,6 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
         //Bottom Sheet behavior
         nestedScrollView = view.findViewById(R.id.bottom_sheet);
         mBehavior = BottomSheetBehavior.from(nestedScrollView);
-        mBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View view, int i) {
-                //On Change state
-                if(i == BottomSheetBehavior.STATE_COLLAPSED){
-                    scrollOnTop();
-                }
-            }
-
-            @Override
-            public void onSlide(@NonNull View view, float v) {
-                //On Slide event
-            }
-        });
     }
 
     /**
@@ -129,14 +115,14 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
     @Override
     public void setupViews() {
         //Map listener
-        if (mapFragment != null)
-            mapFragment.getMapAsync(this);
+        if (mMapFragment != null)
+            mMapFragment.getMapAsync(this);
 
         //Preparing the recycler view
         verticalAdapter = new VerticalAdapter(new ArrayList<Business>());
-        recyclerViewVertical.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerViewVertical.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-        recyclerViewVertical.setAdapter(verticalAdapter);
+        mRecyclerViewVertical.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerViewVertical.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        mRecyclerViewVertical.setAdapter(verticalAdapter);
         verticalAdapter.setOnItemClickListener(new VerticalAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Business obj) {
@@ -157,6 +143,21 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
 
                 //Collapse the bottom sheet
                 mBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+        });
+
+        mBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View view, int i) {
+                //On Change state
+                if(i == BottomSheetBehavior.STATE_COLLAPSED){
+                    scrollOnTop();
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
+                //On Slide event
             }
         });
     }
