@@ -1,6 +1,7 @@
 package io.waazaki.ibmassignment.utils;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -87,5 +88,13 @@ public class Utils {
             }
         }
         return customMarkerList;
+    }
+
+    public static void LogInfo(String message){
+        Log.i("Zacklog" , message);
+    }
+
+    public static void LogError(String message){
+        Log.e("Zacklog" , message);
     }
 }

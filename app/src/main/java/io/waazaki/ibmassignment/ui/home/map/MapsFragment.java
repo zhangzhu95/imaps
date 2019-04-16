@@ -1,9 +1,6 @@
 package io.waazaki.ibmassignment.ui.home.map;
 
-import android.annotation.SuppressLint;
-import android.location.Location;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -19,8 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -28,7 +23,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,10 +34,13 @@ import io.waazaki.ibmassignment.ui.base.BaseFragment;
 import io.waazaki.ibmassignment.utils.CustomMarker;
 import io.waazaki.ibmassignment.utils.Utils;
 
-import static io.waazaki.ibmassignment.utils.AppConstants.TIME_BETWEEN_LOCATION_RETRIES;
-
 public class MapsFragment extends BaseFragment implements MapsContract.IMapsView, OnMapReadyCallback{
 
+    //MVP
+    private MapsPresenter presenter;
+    private MapsInteractorImpl interactor;
+
+    //Views
     private View view;
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
@@ -52,8 +49,6 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
     private VerticalAdapter verticalAdapter;
     private BottomSheetBehavior mBehavior;
     private NestedScrollView nestedScrollView;
-    private FusedLocationProviderClient fusedLocationClient;
-    private MapsPresenter presenter;
 
     //Error message
     LinearLayout mLinearLayoutError;
@@ -65,12 +60,14 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.activity_maps, container, false);
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
-        presenter = new MapsPresenter(this);
+        interactor = new MapsInteractorImpl();
+        presenter = new MapsPresenter(getContext() , this , interactor);
 
         bindViews();
         setupViews();
-        retrieveCurrentPosition();
+
+        //Getting the current position
+        presenter.retrieveCurrentPosition();
 
         return view;
     }
@@ -132,8 +129,9 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
 
                 //Move the map camera to the position of the selected business
                 CustomMarker customMarkerToSelect = Utils.findCustomMarkerFromCoordinates(presenter.getCustomMarkerList(), obj.getCoordinates());
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(customMarkerToSelect.getMarkerOptions().getPosition()));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(customMarkerToSelect.getMarkerOptions().getPosition() , 15f));
 
+                //Show the title of the position
                 if (customMarkerToSelect.getMarker() != null) {
                     customMarkerToSelect.getMarker().showInfoWindow();
                 }
@@ -160,64 +158,6 @@ public class MapsFragment extends BaseFragment implements MapsContract.IMapsView
                 //On Slide event
             }
         });
-    }
-
-    /*
-    If not able to retieve the current position, retry after a certain duration
-     */
-    @Override
-    public void retryRetrieveCurrentPosition(){
-        LogInfo("Retry retrieving current position Again");
-        presenter.incrementLocationRetries();
-        new CountDownTimer(TIME_BETWEEN_LOCATION_RETRIES , TIME_BETWEEN_LOCATION_RETRIES){
-            @Override
-            public void onTick(long l) {
-                //Interval
-            }
-
-            @Override
-            public void onFinish() {
-                if(presenter.hasExceededLocationRetries()){
-                    LogError("Exceeded the number of retries");
-                    showPositionMessage();
-                }else{
-                    retrieveCurrentPosition();
-                }
-            }
-        }.start();
-    }
-
-    /**
-     * Getting the current position
-     */
-    @SuppressLint("MissingPermission")
-    @Override
-    public void retrieveCurrentPosition() {
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-
-                        if (location == null) {
-                            LogInfo("Location is null");
-                            retryRetrieveCurrentPosition();
-                            return;
-                        }else{
-                            LogInfo("Location is available, reset location retries");
-                            presenter.resetLocationRetries();
-                        }
-
-                        //Set the location as a current destination
-                        presenter.setCurrentDestination(location.getLatitude() , location.getLongitude());
-
-                        //Navigate to the current destination
-                        navigateDefaultDestination();
-
-                        //Load businesses of the current destination
-                        presenter.loadBusinesses(presenter.getCurrentCoordinate().getLatitude() , presenter.getCurrentCoordinate().getLongitude());
-                    }
-                });
     }
 
     /**
